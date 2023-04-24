@@ -6,16 +6,20 @@ body {
 }
 
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 100%;
+  margin-top: 200px;
   padding: 0 15px;
 }
 
 .search-form {
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
   background-color: #007bff;
   padding: 30px 0;
   text-align: center;
+  z-index: 100;
 }
 
 .search-form input {
@@ -47,8 +51,8 @@ body {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  margin: 0 -15px;
-  padding: 30px 0;
+  margin: 80px 0;
+  padding: 30px 15px;
 }
 
 .photo-card {
