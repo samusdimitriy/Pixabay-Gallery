@@ -1,6 +1,6 @@
 export const refs = {
   form: document.querySelector('.search-form'),
-  gallery: document.getElementById('gallery'),
+  gallery: document.querySelector('.gallery'),
   input: document.querySelector('.search-form input'),
 };
 

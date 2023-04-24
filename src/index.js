@@ -4,7 +4,6 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 import { imagesTemplate } from './template.js';
 import { getImages } from './api.js';
 import { refs, clearGallery } from './dom-refs.js';
-import { onOpenModal } from './modal.js';
 
 const PER_PAGE = 40;
 let page = 1;
@@ -45,6 +44,7 @@ async function fetchAndRenderImages(query, page) {
     }
 
     appendImagesMarkup(imagesTemplate(hits));
+    initModal('.gallery');
 
     const displayedImagesCount = page * PER_PAGE;
 
@@ -53,48 +53,17 @@ async function fetchAndRenderImages(query, page) {
         "We're sorry, but you've reached the end of search results."
       );
     }
-
-    if (hits.length > 0) {
-      const { height: cardHeight } = document
-        .querySelector('.gallery')
-        .firstElementChild.getBoundingClientRect();
-
-      window.scrollBy({
-        top: cardHeight * 2,
-        behavior: 'smooth',
-      });
-    }
-
-    if (page === 1) {
-      Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
-    }
-
-    initModal();
   } catch (error) {
     console.log(error);
   }
 }
 
-function initModal() {
-  const lightbox = new SimpleLightbox('.photo-card a');
-  lightbox.on('show.simplelightbox', function () {
-    refs.loadMoreBtn.disabled = true;
-  });
+function initModal(galleryContainer) {
+  const lightbox = new SimpleLightbox(`${galleryContainer} a`);
 }
 
 function appendImagesMarkup(markup) {
   refs.gallery.insertAdjacentHTML('beforeend', markup);
-}
-
-const lightbox = new SimpleLightbox('.photo-card a');
-refs.gallery.addEventListener('click', onOpenModal);
-
-function onOpenModal(e) {
-  e.preventDefault();
-  if (e.target.nodeName !== 'IMG') {
-    return;
-  }
-  lightbox.open(e.target.dataset.source);
 }
 
 window.addEventListener('scroll', () => {
