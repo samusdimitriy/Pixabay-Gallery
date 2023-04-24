@@ -60,6 +60,16 @@ async function fetchAndRenderImages(query, page) {
 
 function initModal(galleryContainer) {
   const lightbox = new SimpleLightbox(`${galleryContainer} a`);
+
+  lightbox.on('show.simplelightbox', e => {
+    const id = e.relatedTarget.dataset.id;
+    lightbox.currentImageIndex = id;
+  });
+
+  const overlay = document.querySelector('.sl-overlay');
+  overlay.addEventListener('click', () => {
+    lightbox.close();
+  });
 }
 
 function appendImagesMarkup(markup) {

@@ -1,17 +1,20 @@
 export function imagesTemplate(hits) {
   return hits
     .map(
-      ({
-        webformatURL,
-        largeImageURL,
-        tags,
-        likes,
-        views,
-        comments,
-        downloads,
-      }) => {
+      (
+        {
+          webformatURL,
+          largeImageURL,
+          tags,
+          likes,
+          views,
+          comments,
+          downloads,
+        },
+        index
+      ) => {
         return `
-          <a href="${largeImageURL}" class="photo-card">
+          <a href="#" class="photo-card" data-id="${index}">
             <img src="${webformatURL}" alt="${tags}" data-source="${largeImageURL}" />
             <div class="info">
               <p class="info-item"><b>Likes:</b> ${likes}</p>
@@ -23,9 +26,4 @@ export function imagesTemplate(hits) {
       }
     )
     .join('');
-}
-
-function appendImagesMarkup(markup) {
-  refs.gallery.insertAdjacentHTML('beforeend', markup);
-  refs.loadMoreBtn.disabled = false;
 }
