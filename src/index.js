@@ -1,7 +1,6 @@
 import Notiflix from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
-import InfiniteScroll from 'infinite-scroll';
 import { imagesTemplate } from './template.js';
 import { getImages } from './api.js';
 import { refs, clearGallery } from './dom-refs.js';
@@ -29,8 +28,6 @@ function onSearch(e) {
   fetchAndRenderImages(searchQuery, page);
 }
 
-refs.loadMoreBtn.addEventListener('click', onLoadMore);
-
 async function fetchAndRenderImages(query, page) {
   try {
     const images = await getImages(query, page, PER_PAGE);
@@ -48,20 +45,28 @@ async function fetchAndRenderImages(query, page) {
     }
 
     appendImagesMarkup(imagesTemplate(hits));
-    refs.loadMoreBtn.classList.remove('is-hidden');
-    refs.loadMoreBtn.disabled = false;
 
-    if (page === 1) {
-      Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
+    const displayedImagesCount = page * PER_PAGE;
+
+    if (displayedImagesCount >= totalHits) {
+      Notiflix.Notify.info(
+        "We're sorry, but you've reached the end of search results."
+      );
     }
 
-    if (page > 1) {
-      const { height: cardHeight } =
-        refs.gallery.firstElementChild.getBoundingClientRect();
+    if (hits.length > 0) {
+      const { height: cardHeight } = document
+        .querySelector('.gallery')
+        .firstElementChild.getBoundingClientRect();
+
       window.scrollBy({
         top: cardHeight * 2,
         behavior: 'smooth',
       });
+    }
+
+    if (page === 1) {
+      Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
     }
 
     initModal();
@@ -70,8 +75,11 @@ async function fetchAndRenderImages(query, page) {
   }
 }
 
-function onLoadMore() {
-  fetchAndRenderImages(searchQuery, page);
+function initModal() {
+  const lightbox = new SimpleLightbox('.photo-card a');
+  lightbox.on('show.simplelightbox', function () {
+    refs.loadMoreBtn.disabled = true;
+  });
 }
 
 function appendImagesMarkup(markup) {
@@ -89,29 +97,11 @@ function onOpenModal(e) {
   lightbox.open(e.target.dataset.source);
 }
 
-const infScroll = new InfiniteScroll(refs.gallery, {
-  responseType: 'text',
-  history: false,
-  path: function () {
-    return `https://pixabay.com/api/?image_type=photo&orientation=horizontal&q=${searchQuery}&page=${this.pageIndex}&per_page=${PER_PAGE}&key=23401698-135e50ce95e5557a31c167a52`;
-  },
-  append: '.photo-card',
-  status: '.infinite-scroll-status',
-});
+window.addEventListener('scroll', () => {
+  const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
 
-infScroll.on('load', function (response) {
-  const data = JSON.parse(response);
-  appendImagesMarkup(imagesTemplate(data.hits));
-  this.pageIndex++;
-});
-
-infScroll.on('error', function (error) {
-  console.log(`Error: ${error}`);
-});
-
-infScroll.on('last', function () {
-  refs.loadMoreBtn.classList.add('is-hidden');
-  Notiflix.Notify.info(
-    "We're sorry, but you've reached the end of search results."
-  );
+  if (clientHeight + scrollTop >= scrollHeight - 5) {
+    page += 1;
+    fetchAndRenderImages(searchQuery, page);
+  }
 });
