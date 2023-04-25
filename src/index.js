@@ -4,13 +4,13 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 import { imagesTemplate } from './template.js';
 import { getImages } from './api.js';
 import { refs, clearGallery } from './dom-refs.js';
-// import { onOpenModal, onCloseModal } from './modal.js';
 
 const PER_PAGE = 40;
 let page = 1;
 let searchQuery = '';
 let displayedImagesCount = 0;
 let total = 0;
+let isLoading = false; // Вставьте эту строку
 
 refs.form.addEventListener('submit', onSearch);
 
@@ -31,6 +31,9 @@ function onSearch(e) {
 }
 
 async function fetchAndRenderImages(query, page) {
+  if (isLoading) return;
+  isLoading = true;
+
   try {
     if (displayedImagesCount >= total && displayedImagesCount > 1) {
       console.log(displayedImagesCount);
@@ -59,14 +62,21 @@ async function fetchAndRenderImages(query, page) {
 
     initModal('.gallery');
 
-    displayedImagesCount += total;
+    displayedImagesCount += hits.length;
   } catch (error) {
     console.log(error);
   }
+
+  isLoading = false;
+
+  if (displayedImagesCount >= totalHits) {
+    isLoading = false;
+    return;
+  }
 }
 
-function initModal(gallery) {
-  const lightbox = new SimpleLightbox(`${gallery} a`, {});
+function initModal(galleryContainer) {
+  const lightbox = new SimpleLightbox(`${galleryContainer} a`);
 }
 
 function appendImagesMarkup(markup) {
