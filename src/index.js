@@ -69,7 +69,7 @@ async function fetchAndRenderImages(query, page) {
 
   isLoading = false;
 
-  if (displayedImagesCount >= totalHits) {
+  if (displayedImagesCount >= total) {
     isLoading = false;
     return;
   }
