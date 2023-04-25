@@ -10,7 +10,7 @@ let page = 1;
 let searchQuery = '';
 let displayedImagesCount = 0;
 let total = 0;
-let isLoading = false; // Вставьте эту строку
+let isLoading = false;
 
 refs.form.addEventListener('submit', onSearch);
 
