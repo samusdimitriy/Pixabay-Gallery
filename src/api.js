@@ -6,6 +6,7 @@ export async function getImages(query, page, perPage) {
 
   const response = await fetch(url);
   const data = await response.json();
+  console.log(data);
 
   if (!response.ok) {
     throw new Error(data.message || 'Unable to get images');

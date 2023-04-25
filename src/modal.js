@@ -9,3 +9,11 @@ export function onOpenModal(e) {
     items: [e.target.dataset.source],
   });
 }
+
+export function onCloseModal(e) {
+  if (e.target.nodeName !== 'IMG') {
+    return;
+  }
+
+  SimpleLightbox.close();
+}
