@@ -71,7 +71,6 @@ function initModal(gallery) {
 
 function appendImagesMarkup(markup) {
   refs.gallery.insertAdjacentHTML('beforeend', markup);
-  initModal('.gallery');
 }
 
 window.addEventListener('scroll', () => {
