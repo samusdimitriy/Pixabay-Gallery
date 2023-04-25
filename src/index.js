@@ -4,6 +4,7 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 import { imagesTemplate } from './template.js';
 import { getImages } from './api.js';
 import { refs, clearGallery } from './dom-refs.js';
+// import { onOpenModal, onCloseModal } from './modal.js';
 
 const PER_PAGE = 40;
 let page = 1;
@@ -64,17 +65,8 @@ async function fetchAndRenderImages(query, page) {
   }
 }
 
-function initModal(galleryContainer) {
-  const lightbox = new SimpleLightbox(`${galleryContainer} a`);
-
-  lightbox.on('show.simplelightbox', e => {
-    const id = e.relatedTarget.dataset.id;
-    lightbox.currentImageIndex = id;
-  });
-
-  lightbox.on('close.simplelightbox', () => {
-    lightbox.close();
-  });
+function initModal(gallery) {
+  const lightbox = new SimpleLightbox(`${gallery} a`, {});
 }
 
 function appendImagesMarkup(markup) {

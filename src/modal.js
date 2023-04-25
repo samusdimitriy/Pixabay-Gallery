@@ -1,19 +1,18 @@
-import SimpleLightbox from 'simplelightbox';
+// import SimpleLightbox from 'simplelightbox';
 
-export function onOpenModal(e) {
-  if (e.target.nodeName !== 'IMG') {
-    return;
-  }
+// let lightbox;
 
-  SimpleLightbox.open({
-    items: [e.target.dataset.source],
-  });
-}
+// export function onOpenModal(e) {
+//   if (e.target.nodeName !== 'IMG') {
+//     return;
+//   }
 
-export function onCloseModal(e) {
-  if (e.target.nodeName !== 'IMG') {
-    return;
-  }
+//   lightbox = new SimpleLightbox(`[data-source="${e.target.dataset.source}"]`);
+//   lightbox.open();
+// }
 
-  SimpleLightbox.close();
-}
+// export function onCloseModal(e) {
+//   if (lightbox && lightbox.isOpen()) {
+//     lightbox.close();
+//   }
+// }
