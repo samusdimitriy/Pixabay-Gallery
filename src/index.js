@@ -71,7 +71,12 @@ async function fetchAndRenderImages(query, page) {
 }
 
 function initModal(galleryContainer) {
-  const lightbox = new SimpleLightbox(`${galleryContainer} a`);
+  const lightbox = new SimpleLightbox(`${galleryContainer} a`, {
+    closeOnOverlayClick: true,
+    closeOnEscapeKey: true,
+    closeBtnInside: true,
+    onSlideClose: (el, index) => {},
+  });
 }
 
 function appendImagesMarkup(markup) {
