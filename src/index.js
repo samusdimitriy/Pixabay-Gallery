@@ -35,22 +35,21 @@ async function fetchAndRenderImages(query, page) {
   isLoading = true;
 
   try {
-    if (displayedImagesCount >= total && displayedImagesCount > 1) {
-      console.log(displayedImagesCount);
-      Notiflix.Notify.info(
-        "We're sorry, but you've reached the end of search results."
-      );
-      return;
-    }
     const images = await getImages(query, page, PER_PAGE);
     const { hits, totalHits } = images;
     total = totalHits;
 
-    if (hits.length === 0 || displayedImagesCount >= totalHits) {
-      console.log(displayedImagesCount >= totalHits);
-      Notiflix.Notify.failure(
-        'Sorry, there are no images matching your search query. Please try again.'
-      );
+    if (hits.length === 0) {
+      if (displayedImagesCount === 0) {
+        Notiflix.Notify.failure(
+          'Sorry, there are no images matching your search query. Please try again.'
+        );
+      } else {
+        Notiflix.Notify.info(
+          "We're sorry, but you've reached the end of search results."
+        );
+      }
+      isLoading = false;
       return;
     }
 
@@ -65,14 +64,10 @@ async function fetchAndRenderImages(query, page) {
     displayedImagesCount += hits.length;
   } catch (error) {
     console.log(error);
+    isLoading = false;
   }
 
   isLoading = false;
-
-  if (displayedImagesCount >= total) {
-    isLoading = false;
-    return;
-  }
 }
 
 function initModal(galleryContainer) {
@@ -83,10 +78,23 @@ function appendImagesMarkup(markup) {
   refs.gallery.insertAdjacentHTML('beforeend', markup);
 }
 
+let previousScrollTop = 0;
+
 window.addEventListener('scroll', () => {
   const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+
   if (clientHeight + scrollTop >= scrollHeight - 5) {
-    page += 1;
-    fetchAndRenderImages(searchQuery, page);
+    if (displayedImagesCount >= total) {
+      if (scrollTop > previousScrollTop) {
+        Notiflix.Notify.info(
+          "We're sorry, but you've reached the end of search results."
+        );
+      }
+    } else {
+      page += 1;
+      fetchAndRenderImages(searchQuery, page);
+    }
   }
+
+  previousScrollTop = scrollTop;
 });
