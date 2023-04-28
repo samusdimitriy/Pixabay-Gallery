@@ -26,6 +26,7 @@ function onSearch(e) {
 
   clearGallery();
   page = 1;
+  displayedImagesCount = 0;
 
   fetchAndRenderImages(searchQuery, page);
 }
@@ -93,7 +94,7 @@ function appendImagesMarkup(markup) {
 
 async function checkIfMoreImagesNeeded() {
   const { scrollHeight, clientHeight } = document.documentElement;
-  if (clientHeight >= scrollHeight) {
+  if (clientHeight >= scrollHeight && !isLoading) {
     page += 1;
     await fetchAndRenderImages(searchQuery, page);
   }
@@ -104,7 +105,7 @@ let previousScrollTop = 0;
 window.addEventListener('scroll', () => {
   const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
 
-  if (clientHeight + scrollTop >= scrollHeight - 5) {
+  if (clientHeight + scrollTop >= scrollHeight - 5 && !isLoading) {
     if (displayedImagesCount >= total) {
       if (scrollTop > previousScrollTop) {
         Notiflix.Notify.info(
