@@ -63,7 +63,6 @@ async function fetchAndRenderImages(query, page) {
 
     displayedImagesCount += hits.length;
 
-    // Add the notification after the first request
     if (page === 1) {
       Notiflix.Notify.success(`Hooray! We found ${total} images.`);
     }
@@ -74,7 +73,6 @@ async function fetchAndRenderImages(query, page) {
 
   isLoading = false;
 
-  // Add this check after initial images load
   if (displayedImagesCount < total) {
     checkIfMoreImagesNeeded();
   }
