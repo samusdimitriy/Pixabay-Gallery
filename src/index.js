@@ -62,12 +62,22 @@ async function fetchAndRenderImages(query, page) {
     initModal('.gallery');
 
     displayedImagesCount += hits.length;
+
+    // Add the notification after the first request
+    if (page === 1) {
+      Notiflix.Notify.success(`Hooray! We found ${total} images.`);
+    }
   } catch (error) {
     console.log(error);
     isLoading = false;
   }
 
   isLoading = false;
+
+  // Add this check after initial images load
+  if (displayedImagesCount < total) {
+    checkIfMoreImagesNeeded();
+  }
 }
 
 function initModal(galleryContainer) {
@@ -81,6 +91,14 @@ function initModal(galleryContainer) {
 
 function appendImagesMarkup(markup) {
   refs.gallery.insertAdjacentHTML('beforeend', markup);
+}
+
+async function checkIfMoreImagesNeeded() {
+  const { scrollHeight, clientHeight } = document.documentElement;
+  if (clientHeight >= scrollHeight) {
+    page += 1;
+    await fetchAndRenderImages(searchQuery, page);
+  }
 }
 
 let previousScrollTop = 0;
