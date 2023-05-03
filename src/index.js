@@ -1,122 +1,80 @@
-import Notiflix from 'notiflix';
+import { Notify } from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
+import { ApiService } from './api';
+import { imagesTemplate } from './template';
+import { refs } from './dom-refs';
 import 'simplelightbox/dist/simple-lightbox.min.css';
-import { imagesTemplate } from './template.js';
-import { getImages } from './api.js';
-import { refs, clearGallery } from './dom-refs.js';
 
-const PER_PAGE = 40;
-let page = 1;
-let searchQuery = '';
-let displayedImagesCount = 0;
-let total = 0;
-let isLoading = false;
+let lightbox = new SimpleLightbox('.gallery a', {
+  captionDelay: 500,
+  captionsData: 'alt',
+});
 
-refs.form.addEventListener('submit', onSearch);
+const apiService = new ApiService();
+
+refs.formEl.addEventListener('submit', onSearch);
 
 function onSearch(e) {
   e.preventDefault();
 
-  searchQuery = e.currentTarget.elements.searchQuery.value.trim();
-
-  if (!searchQuery) {
-    Notiflix.Notify.failure('Please enter a search word.');
-    return;
-  }
-
+  apiService.query = e.currentTarget.elements.searchQuery.value.trim();
+  apiService.resetPage();
   clearGallery();
-  page = 1;
-  displayedImagesCount = 0;
-
-  fetchAndRenderImages(searchQuery, page);
+  if (!apiService.query) {
+    return Notify.failure('Please enter a search word.');
+  }
+  getResults();
 }
 
-async function fetchAndRenderImages(query, page) {
-  if (isLoading) return;
-  isLoading = true;
+function getResults() {
+  infiniteScroll.unobserve(refs.observableEl);
+  renderImages();
+}
 
-  try {
-    const images = await getImages(query, page, PER_PAGE);
-    const { hits, totalHits } = images;
-    total = totalHits;
-
-    if (hits.length === 0) {
-      if (displayedImagesCount === 0) {
-        Notiflix.Notify.failure(
+export function renderImages() {
+  apiService.getImages().then(({ hits, totalHits }) => {
+    if (apiService.page === 1) {
+      if (apiService.query === '' || !totalHits) {
+        return Notify.failure(
           'Sorry, there are no images matching your search query. Please try again.'
         );
-      } else {
-        Notiflix.Notify.info(
-          "We're sorry, but you've reached the end of search results."
-        );
       }
-      isLoading = false;
-      return;
+      Notify.success(`Hooray! We found ${totalHits} images.`);
     }
 
-    if (page === 1) {
-      clearGallery();
+    imagesTemplate(hits);
+    lightbox.refresh();
+    infiniteScroll.observe(refs.observableEl);
+
+    if (apiService.page === Math.ceil(totalHits / 40)) {
+      infiniteScroll.unobserve(refs.observableEl);
+      lightbox.refresh();
+      return Notify.info(
+        "We're sorry, but you've reached the end of search results."
+      );
     }
-
-    appendImagesMarkup(imagesTemplate(hits));
-
-    initModal('.gallery');
-
-    displayedImagesCount += hits.length;
-
-    if (page === 1) {
-      Notiflix.Notify.success(`Hooray! We found ${total} images.`);
-    }
-  } catch (error) {
-    console.log(error);
-    isLoading = false;
-  }
-
-  isLoading = false;
-
-  if (displayedImagesCount < total) {
-    checkIfMoreImagesNeeded();
-  }
-}
-
-function initModal(galleryContainer) {
-  const lightbox = new SimpleLightbox(`${galleryContainer} a`, {
-    closeOnOverlayClick: true,
-    closeOnEscapeKey: true,
-    closeBtnInside: true,
-    onSlideClose: (el, index) => {},
+    apiService.enlargementPage();
   });
 }
 
-function appendImagesMarkup(markup) {
-  refs.gallery.insertAdjacentHTML('beforeend', markup);
+function clearGallery() {
+  refs.galleryEl.innerHTML = '';
 }
 
-async function checkIfMoreImagesNeeded() {
-  const { scrollHeight, clientHeight } = document.documentElement;
-  if (clientHeight >= scrollHeight && !isLoading) {
-    page += 1;
-    await fetchAndRenderImages(searchQuery, page);
-  }
-}
+const options = {
+  rootMargin: '400px',
+  history: false,
+};
 
-let previousScrollTop = 0;
+const onEntry = entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting && apiService.query !== '') {
+      if (apiService.page === 1) return;
 
-window.addEventListener('scroll', () => {
-  const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-
-  if (clientHeight + scrollTop >= scrollHeight - 5 && !isLoading) {
-    if (displayedImagesCount >= total) {
-      if (scrollTop > previousScrollTop) {
-        Notiflix.Notify.info(
-          "We're sorry, but you've reached the end of search results."
-        );
-      }
-    } else {
-      page += 1;
-      fetchAndRenderImages(searchQuery, page);
+      renderImages();
     }
-  }
+  });
+};
 
-  previousScrollTop = scrollTop;
-});
+const infiniteScroll = new IntersectionObserver(onEntry, options);
+infiniteScroll.observe(refs.observableEl);

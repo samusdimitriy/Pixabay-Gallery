@@ -1,9 +1,5 @@
 export const refs = {
-  form: document.querySelector('.search-form'),
-  gallery: document.querySelector('.gallery'),
-  input: document.querySelector('.search-form input'),
+  formEl: document.querySelector('.search-form'),
+  galleryEl: document.querySelector('.gallery'),
+  observableEl: document.querySelector('.guard'),
 };
-
-export function clearGallery() {
-  refs.gallery.innerHTML = '';
-}
